@@ -1269,6 +1269,12 @@ class ReservaServiceTest {
         assertNotNull(response);
         assertEquals(2, response.size());
 
+        assertEquals(1L, response.get(0).getId());
+        assertEquals(2L, response.get(1).getId());
+
+        assertEquals(StatusReserva.PENDENTE, response.get(0).getStatus());
+        assertEquals(StatusReserva.PENDENTE, response.get(1).getStatus());
+
         assertTrue(response.stream()
                 .allMatch(reserva -> reserva.getClienteId().equals(1L)));
 
