@@ -11,6 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
@@ -127,7 +128,19 @@ class ReservaServiceTest {
         assertEquals(StatusReserva.PENDENTE, response.getStatus());
         assertEquals(new BigDecimal("150.00"), response.getValorDiaria());
 
-        verify(reservaRepository).save(any(Reserva.class));
+        ArgumentCaptor<Reserva> reservaCaptor =
+                ArgumentCaptor.forClass(Reserva.class);
+
+        verify(reservaRepository).save(reservaCaptor.capture());
+
+        Reserva reservaSalva = reservaCaptor.getValue();
+
+        assertEquals(cliente, reservaSalva.getCliente());
+        assertEquals(veiculo, reservaSalva.getVeiculo());
+        assertEquals(retirada, reservaSalva.getDataRetirada());
+        assertEquals(devolucao, reservaSalva.getDataDevolucao());
+        assertEquals(new BigDecimal("150.00"), reservaSalva.getValorDiaria());
+        assertEquals(StatusReserva.PENDENTE, reservaSalva.getStatus());
     }
 
     @Test
