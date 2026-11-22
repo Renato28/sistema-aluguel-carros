@@ -108,7 +108,11 @@ class ReservaServiceTest {
 
         when(reservaRepository.
                 existsByVeiculoIdAndStatusInAndDataRetiradaLessThanAndDataDevolucaoGreaterThan(
-                        eq(1L), any(), eq(devolucao), eq(retirada)))
+                        eq(1L),
+                        argThat(status -> status.equals(
+                                List.of(StatusReserva.PENDENTE, StatusReserva.CONFIRMADA))),
+                        eq(devolucao),
+                        eq(retirada)))
         .thenReturn(false);
 
         when(reservaRepository.save(any(Reserva.class)))
@@ -161,7 +165,11 @@ class ReservaServiceTest {
 
         when(reservaRepository
                 .existsByVeiculoIdAndStatusInAndDataRetiradaLessThanAndDataDevolucaoGreaterThan(
-                        eq(1L), any(), eq(devolucao), eq(retirada)))
+                        eq(1L),
+                        argThat(status -> status.equals(
+                                List.of(StatusReserva.PENDENTE, StatusReserva.CONFIRMADA))),
+                        eq(devolucao),
+                        eq(retirada)))
                 .thenReturn(false);
 
         when(reservaRepository.save(any(Reserva.class)))
