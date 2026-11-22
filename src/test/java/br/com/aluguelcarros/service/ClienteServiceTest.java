@@ -8,7 +8,6 @@ import br.com.aluguelcarros.repository.ClienteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -44,10 +43,10 @@ class ClienteServiceTest {
         request.setCpf("12345678901");
         request.setEmail("joao@email.com");
         request.setTelefone("83999999999");
-        request.setDataNascimento(LocalDate.of(1990, 5 , 10));
+        request.setDataNascimento(LocalDate.of(1990, 5, 10));
 
         when(clienteRepository.existsByCpf("12345678901"))
-            .thenReturn(false);
+                .thenReturn(false);
 
         when(clienteRepository.save(any(Cliente.class)))
                 .thenAnswer(invocation -> {
