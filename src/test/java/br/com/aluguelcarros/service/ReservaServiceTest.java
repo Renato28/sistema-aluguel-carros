@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -709,7 +710,8 @@ class ReservaServiceTest {
                 .existsByVeiculoIdAndIdNotAndStatusInAndDataRetiradaLessThanAndDataDevolucaoGreaterThan(
                         eq(1L),
                         eq(1L),
-                        any(),
+                        argThat(status -> status.equals(
+                                List.of(StatusReserva.PENDENTE, StatusReserva.CONFIRMADA))),
                         eq(novaDevolucao),
                         eq(novaRetirada)))
                 .thenReturn(false);
@@ -734,7 +736,8 @@ class ReservaServiceTest {
                 .existsByVeiculoIdAndIdNotAndStatusInAndDataRetiradaLessThanAndDataDevolucaoGreaterThan(
                         eq(1L),
                         eq(1L),
-                        any(),
+                        argThat(status -> status.equals(
+                                List.of(StatusReserva.PENDENTE, StatusReserva.CONFIRMADA))),
                         eq(novaDevolucao),
                         eq(novaRetirada));
     }
