@@ -975,6 +975,7 @@ class ReservaServiceTest {
         );
 
         assertEquals(StatusReserva.PENDENTE, reserva.getStatus());
+        verify(reservaRepository, never()).save(any(Reserva.class));
 
     }
 
