@@ -29,6 +29,7 @@ public class CategoriaVeiculoServiceTest {
     void deveListarTodasAsCategoriasConvertendoParaResponse() {
         //Arrange
         CategoriaVeiculo categoria = new CategoriaVeiculo();
+        categoria.setId(1L);
         categoria.setNome("SUV");
         categoria.setDescricao("Veículos utilitários esportivos.");
         categoria.setAtiva(true);
@@ -44,6 +45,7 @@ public class CategoriaVeiculoServiceTest {
 
         CategoriaVeiculoResponse response = resultado.getFirst();
 
+        assertEquals(1L, response.getId());
         assertEquals("SUV", response.getNome());
         assertEquals("Veículos utilitários esportivos.", response.getDescricao());
         assertTrue(response.isAtiva());
@@ -63,7 +65,11 @@ public class CategoriaVeiculoServiceTest {
                 .thenReturn(false);
 
         when(categoriaVeiculoRepository.save(any(CategoriaVeiculo.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+                .thenAnswer(invocation -> {
+                    CategoriaVeiculo categoria = invocation.getArgument(0);
+                    categoria.setId(1L);
+                    return categoria;
+                });
 
         // Act
         CategoriaVeiculoResponse resultado =
@@ -71,6 +77,7 @@ public class CategoriaVeiculoServiceTest {
 
         // Assert
         assertNotNull(resultado);
+        assertEquals(1L, resultado.getId());
         assertEquals("SUV", resultado.getNome());
         assertEquals("Veículos utilitários esportivos", resultado.getDescricao());
         assertTrue(resultado.isAtiva());
@@ -78,6 +85,7 @@ public class CategoriaVeiculoServiceTest {
         verify(categoriaVeiculoRepository, times(1)).existsByNome("SUV");
         verify(categoriaVeiculoRepository, times(1))
                 .save(any(CategoriaVeiculo.class));
+        verify(categoriaVeiculoRepository).save(argThat(CategoriaVeiculo::isAtiva));
     }
 
     @Test
