@@ -18,7 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -67,7 +69,14 @@ class ClienteServiceTest {
         assertTrue(response.isAtivo());
 
         verify(clienteRepository).existsByCpf("12345678901");
-        verify(clienteRepository).save(any(Cliente.class));
+        verify(clienteRepository).save(argThat(cliente ->
+                cliente.getNome().equals("João da Silva")
+                        && cliente.getCpf().equals("12345678901")
+                        && cliente.getEmail().equals("joao@email.com")
+                        && cliente.getTelefone().equals("83999999999")
+                        && cliente.getDataNascimento().equals(LocalDate.of(1990, 5, 10))
+                        && cliente.isAtivo()
+        ));
     }
 
     @Test
@@ -93,7 +102,8 @@ class ClienteServiceTest {
                 exception.getMessage()
         );
 
-        verify(clienteRepository).existsByCpf("12345678901");
+        verify(clienteRepository, times(1)).existsByCpf("12345678901");
         verify(clienteRepository, never()).save(any(Cliente.class));
+
     }
 }
