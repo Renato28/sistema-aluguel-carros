@@ -1005,6 +1005,12 @@ class ReservaServiceTest {
                         LocalDate.of(2026, 12, 15)
                 )
         );
+
+        verify(reservaRepository, never()).save(any(Reserva.class));
+
+        verify(reservaRepository, never())
+                .existsByVeiculoIdAndIdNotAndStatusInAndDataRetiradaLessThanAndDataDevolucaoGreaterThan(
+                        any(), any(), any(), any(), any());
     }
 
     @Test
