@@ -32,7 +32,7 @@ public class Veiculo {
     private String cor;
 
     @Column(nullable = false)
-    private Integer quilometragem;
+    private Integer quilometragem = 0;
 
     @Column(name = "valor_diaria", nullable = false, precision = 10, scale = 2)
     private BigDecimal valorDiaria;
