@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
@@ -204,7 +205,16 @@ class AuthServiceTest {
         assertEquals("Bearer", response.tipo());
         assertEquals(3600000L, response.expiresIn());
 
-        verify(authenticationManager).authenticate(any());
+        ArgumentCaptor<UsernamePasswordAuthenticationToken> authenticationCaptor =
+                ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);
+
+        verify(authenticationManager).authenticate(authenticationCaptor.capture());
+
+        UsernamePasswordAuthenticationToken authentication =
+                authenticationCaptor.getValue();
+
+        assertEquals("joao@email.com", authentication.getPrincipal());
+        assertEquals("senha123", authentication.getCredentials());
         verify(usuarioRepository).findByEmail("joao@email.com");
         verify(jwtService).gerarToken("joao@email.com",  "CLIENTE");
     }
