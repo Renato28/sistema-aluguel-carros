@@ -291,7 +291,7 @@ public class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(401, response.getBody().getStatus());
-        assertEquals("Credenciais inválidas", response.getBody().getMensagem());
+        assertEquals("Credenciais inválidas ou não autorizadas.", response.getBody().getMensagem());
         assertNotNull(response.getBody().getTimestamp());
     }
 
