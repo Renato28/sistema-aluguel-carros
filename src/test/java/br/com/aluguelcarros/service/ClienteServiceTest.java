@@ -104,6 +104,5 @@ class ClienteServiceTest {
 
         verify(clienteRepository, times(1)).existsByCpf("12345678901");
         verify(clienteRepository, never()).save(any(Cliente.class));
-
     }
 }
