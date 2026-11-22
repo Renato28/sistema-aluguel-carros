@@ -97,6 +97,7 @@ class VeiculoServiceTest {
         assertEquals("Preto", response.getCor());
         assertEquals(1000, response.getQuilometragem());
         assertEquals(new BigDecimal("250.00"), response.getValorDiaria());
+        assertEquals(StatusVeiculo.DISPONIVEL, response.getStatus());
 
         verify(veiculoRepository).existsByPlaca("ABC1D23");
         verify(categoriaVeiculoRepository).findById(1L);
@@ -248,6 +249,7 @@ class VeiculoServiceTest {
         assertEquals("XYZ1A23", response.getPlaca());
         assertEquals("Prata", response.getCor());
         assertEquals(2024, response.getAnoFabricacao());
+        assertEquals(5000, response.getQuilometragem());
         assertEquals(1L, response.getCategoriaId());
         assertEquals("Sedan", response.getCategoriaNome());
         assertEquals(new BigDecimal("300.00"), response.getValorDiaria());
@@ -419,6 +421,8 @@ class VeiculoServiceTest {
         assertEquals("Honda", response.getFirst().getMarca());
         assertEquals("Civic", response.getFirst().getModelo());
         assertEquals("Sedan", response.getFirst().getCategoriaNome());
+        verify(veiculoRepository)
+                .findAllByStatusNot(StatusVeiculo.INATIVO);
     }
 
     @Test
@@ -507,6 +511,7 @@ class VeiculoServiceTest {
 
         verify(veiculoRepository).findById(1L);
         verify(veiculoRepository).save(veiculo);
+        verify(veiculoRepository, never()).delete(any(Veiculo.class));
     }
 
     @Test
