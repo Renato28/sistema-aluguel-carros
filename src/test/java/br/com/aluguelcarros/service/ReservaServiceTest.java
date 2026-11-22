@@ -774,6 +774,9 @@ class ReservaServiceTest {
 
         verify(reservaRepository).findById(1L);
         verify(reservaRepository, never()).save(any(Reserva.class));
+        verify(reservaRepository, never())
+                .existsByVeiculoIdAndIdNotAndStatusInAndDataRetiradaLessThanAndDataDevolucaoGreaterThan(
+                        any(), any(), any(), any(), any());
     }
 
     @Test
@@ -799,6 +802,9 @@ class ReservaServiceTest {
 
         verify(reservaRepository).findById(1L);
         verify(reservaRepository, never()).save(any(Reserva.class));
+        verify(reservaRepository, never())
+                .existsByVeiculoIdAndIdNotAndStatusInAndDataRetiradaLessThanAndDataDevolucaoGreaterThan(
+                        any(), any(), any(), any(), any());
     }
 
     @Test
@@ -824,6 +830,9 @@ class ReservaServiceTest {
 
         verify(reservaRepository).findById(1L);
         verify(reservaRepository, never()).save(any(Reserva.class));
+        verify(reservaRepository, never())
+                .existsByVeiculoIdAndIdNotAndStatusInAndDataRetiradaLessThanAndDataDevolucaoGreaterThan(
+                        any(), any(), any(), any(), any());
     }
 
     @Test
@@ -901,7 +910,8 @@ class ReservaServiceTest {
         when(reservaRepository.existsByVeiculoIdAndIdNotAndStatusInAndDataRetiradaLessThanAndDataDevolucaoGreaterThan(
                 eq(1L),
                 eq(1L),
-                any(),
+                argThat(status -> status.equals(
+                        List.of(StatusReserva.PENDENTE, StatusReserva.CONFIRMADA))),
                 eq(novaDevolucao),
                 eq(novaRetirada)
         )).thenReturn(true);
