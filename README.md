@@ -30,6 +30,7 @@ O projeto foi desenvolvido com foco em boas práticas de desenvolvimento backend
 - **JaCoCo** — análise de cobertura dos testes.
 - **Maven** — gerenciamento de dependências e build.
 - **Docker / Docker Compose** — ambiente do banco de dados.
+- **Spring Boot Actuator** — monitoramento e exposição de informações operacionais da aplicação.
 
 ## Funcionalidades
 
@@ -66,6 +67,9 @@ O projeto foi desenvolvido com foco em boas práticas de desenvolvimento backend
 - Validação dos dados recebidos pela API.
 - Tratamento padronizado de erros.
 - Proteção de senhas com BCrypt.
+- Monitoramento da aplicação com Spring Boot Actuator.
+- Exposição controlada de indicadores de saúde, informações e métricas.
+- Proteção dos endpoints de monitoramento com autenticação JWT, exceto o health.
 
 ## Regras de negócio
 
@@ -113,7 +117,7 @@ src/main/java/br/com/aluguelcarros/
 
 ## Endpoints da API
 
-Todos os endpoints abaixo exigem autenticação JWT, exceto os endpoints de autenticação (`/api/auth/**`) e a documentação Swagger.
+Todos os endpoints exigem autenticação JWT, exceto os endpoints de autenticação (`/api/auth/**`), a documentação Swagger e o endpoint de saúde do Actuator (`/actuator/health`).
 
 ### Autenticação — `/api/auth`
 
@@ -168,6 +172,39 @@ Após iniciar a aplicação, a documentação Swagger estará disponível em:
 A especificação OpenAPI estará disponível em:
 
 `http://localhost:8080/v3/api-docs`
+
+### Monitoramento — Spring Boot Actuator
+
+A aplicação utiliza Spring Boot Actuator para disponibilizar informações operacionais e métricas.
+
+Os seguintes endpoints estão habilitados:
+
+| Método | Endpoint | Descrição | Acesso |
+|---|---|---|---|
+| GET | `/actuator/health` | Consultar o estado de saúde da aplicação | Público |
+| GET | `/actuator/info` | Consultar informações da aplicação | Autenticado |
+| GET | `/actuator/metrics` | Listar métricas disponíveis | Autenticado |
+| GET | `/actuator/metrics/{metricName}` | Consultar uma métrica específica | Autenticado |
+
+**Observações:**
+
+- Os endpoints são expostos de forma controlada.
+- Os endpoints protegidos exigem autenticação JWT.
+- Os detalhes de saúde são apresentados somente a usuários autorizados.
+- A aplicação não expõe indiscriminadamente todos os endpoints do Actuator.
+
+Exemplo de consulta de saúde:
+
+```bash
+curl http://localhost:8080/actuator/health
+```
+
+Exemplo de consulta de informações com JWT:
+
+```bash
+curl http://localhost:8080/actuator/info \
+  -H "Authorization: Bearer SEU_TOKEN"
+```
 
 ## Pré-requisitos
 
