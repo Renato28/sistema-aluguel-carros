@@ -1,5 +1,6 @@
 package br.com.aluguelcarros.security;
 
+import br.com.aluguelcarros.config.TestcontainersConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,12 +12,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(SecurityConfigIntegrationTest.TestController.class)
+@Import({
+        TestcontainersConfiguration.class,
+        SecurityConfigIntegrationTest.TestController.class
+})
 @TestPropertySource(
         properties = "jwt.secret=bWluaGEtY2hhdmUtc2VjcmV0YS1wYXJhLXRlc3Rlcw=="
 )
