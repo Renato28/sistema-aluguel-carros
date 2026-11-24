@@ -26,7 +26,8 @@ O projeto foi desenvolvido com foco em boas práticas de desenvolvimento backend
 - **Flyway** — versionamento e gerenciamento de migrations.
 - **Bean Validation** — validação de dados de entrada.
 - **Springdoc OpenAPI / Swagger UI** — documentação da API.
-- **JUnit 5, Mockito e Spring Boot Test** — testes automatizados.
+- **JUnit 5, Mockito e Spring Boot Test** — testes unitários e de integração.
+- **Testcontainers 2.0.5** — provisionamento de ambientes PostgreSQL isolados para testes de integração.
 - **JaCoCo** — análise de cobertura dos testes.
 - **Maven** — gerenciamento de dependências e build.
 - **Docker / Docker Compose** — ambiente do banco de dados.
@@ -217,6 +218,8 @@ Para executar o projeto localmente, é necessário ter instalado:
 
 O Maven Wrapper está incluído no projeto e configura automaticamente o Maven 3.10.0, não sendo necessário instalá-lo separadamente.
 
+**Importante:** o Docker Engine deve estar em execução para executar os testes de integração com Testcontainers, que inicializa automaticamente um container PostgreSQL 16.
+
 ## Configuração do ambiente
 
 ### 1. Configurar a senha do PostgreSQL
@@ -253,19 +256,7 @@ docker compose up -d db
 
 O comando inicia o PostgreSQL 16 utilizando Docker Compose.
 
-### 4. Criar o banco de dados de testes
-
-Além do banco principal `aluguel_carros`, utilizado pela aplicação, é necessário criar o banco `aluguel_carros_test`, utilizado pelos testes automatizados.
-
-Execute uma única vez:
-
-```bash
-docker exec aluguel-carros-db createdb -U postgres aluguel_carros_test
-```
-
-As migrations do Flyway são executadas no banco de testes durante a inicialização dos testes.
-
-### 5. Executar a aplicação
+### 4. Executar a aplicação
 
 Com o PostgreSQL em execução e as variáveis de ambiente configuradas:
 
@@ -277,7 +268,7 @@ A API estará disponível em:
 
 `http://localhost:8080`
 
-### 6. Executar os testes automatizados
+### 5. Executar os testes automatizados
 
 Para executar a suíte de testes:
 
@@ -285,4 +276,6 @@ Para executar a suíte de testes:
 ./mvnw test
 ```
 
-Os testes utilizam o banco `aluguel_carros_test`, separado do banco principal da aplicação.
+Os testes de integração utilizam o Testcontainers para criar e iniciar automaticamente um container PostgreSQL 16 isolado. Durante a inicialização, as migrations do Flyway são executadas nesse banco.
+
+Não é necessário criar manualmente um banco de testes nem iniciar o serviço PostgreSQL do Docker Compose para executar os testes. Basta manter o Docker Engine em execução.
