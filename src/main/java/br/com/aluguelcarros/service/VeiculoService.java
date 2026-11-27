@@ -8,6 +8,9 @@ import br.com.aluguelcarros.entity.Veiculo;
 import br.com.aluguelcarros.exception.*;
 import br.com.aluguelcarros.repository.CategoriaVeiculoRepository;
 import br.com.aluguelcarros.repository.VeiculoRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +37,7 @@ public class VeiculoService {
         this.categoriaVeiculoRepository = categoriaVeiculoRepository;
     }
 
+    @CacheEvict(value = "veiculos", allEntries = true)
     @Transactional
     public VeiculoResponse cadastrar(VeiculoRequest request) {
 
@@ -57,6 +61,10 @@ public class VeiculoService {
         return converterParaResponse(veiculoSalvo);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "veiculos", allEntries = true),
+            @CacheEvict(value = "veiculo", key = "#id")
+    })
     @Transactional
     public VeiculoResponse atualizar(Long id, VeiculoRequest request) {
 
@@ -85,6 +93,7 @@ public class VeiculoService {
 
     }
 
+    @Cacheable("veiculos")
     @Transactional(readOnly = true)
     public List<VeiculoResponse> listarTodos() {
         return veiculoRepository.findAllByStatusNot(StatusVeiculo.INATIVO)
@@ -93,6 +102,7 @@ public class VeiculoService {
                 .toList();
     }
 
+    @Cacheable(value = "veiculo", key = "#id")
     @Transactional(readOnly = true)
     public VeiculoResponse buscarPorId(Long id) {
         Veiculo veiculo = veiculoRepository.findById(id)
@@ -102,6 +112,10 @@ public class VeiculoService {
         return converterParaResponse(veiculo);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "veiculos", allEntries = true),
+            @CacheEvict(value = "veiculo", key = "#id")
+    })
     @Transactional
     public void excluir(Long id) {
 

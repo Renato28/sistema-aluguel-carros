@@ -1,10 +1,12 @@
 package br.com.aluguelcarros.service;
 
-import br.com.aluguelcarros.dto.CategoriaVeiculoResponse;
-import br.com.aluguelcarros.exception.CategoriaDuplicadaException;
 import br.com.aluguelcarros.dto.CategoriaVeiculoRequest;
+import br.com.aluguelcarros.dto.CategoriaVeiculoResponse;
 import br.com.aluguelcarros.entity.CategoriaVeiculo;
+import br.com.aluguelcarros.exception.CategoriaDuplicadaException;
 import br.com.aluguelcarros.repository.CategoriaVeiculoRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +22,7 @@ public class CategoriaVeiculoService {
         this.categoriaVeiculoRepository = categoriaVeiculoRepository;
     }
 
+    @Cacheable("categorias")
     public List<CategoriaVeiculoResponse> listarTodas() {
         return this.categoriaVeiculoRepository.findAll()
                 .stream()
@@ -27,6 +30,10 @@ public class CategoriaVeiculoService {
                 .toList();
     }
 
+    @CacheEvict(
+            value = "categorias",
+            allEntries = true
+    )
     public CategoriaVeiculoResponse cadastrar(CategoriaVeiculoRequest request) {
         if (categoriaVeiculoRepository.existsByNome(request.getNome())) {
             throw new CategoriaDuplicadaException(
