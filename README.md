@@ -2,7 +2,7 @@
 
 API REST desenvolvida em Java com Spring Boot para gerenciamento de uma locadora de veículos. O sistema contempla o cadastro de clientes e veículos, gerenciamento de reservas, controle de disponibilidade e autenticação com autorização baseada em perfis de usuário.
 
-O projeto foi desenvolvido com foco em boas práticas de desenvolvimento backend, organização em camadas, segurança, validação de dados, persistência relacional, versionamento de banco de dados e testes automatizados.
+O projeto foi desenvolvido com foco em boas práticas de desenvolvimento backend, organização em camadas, segurança, validação de dados, persistência relacional, versionamento de banco de dados, cache distribuído e testes automatizados.
 
 ## Objetivos do projeto
 
@@ -10,6 +10,7 @@ O projeto foi desenvolvido com foco em boas práticas de desenvolvimento backend
 - Aplicar conceitos de arquitetura em camadas e separação de responsabilidades.
 - Implementar autenticação e autorização utilizando Spring Security e JWT.
 - Garantir a integridade dos dados com PostgreSQL e Flyway.
+- Implementar cache com Redis para otimizar consultas frequentes.
 - Implementar regras de negócio para gerenciamento de reservas.
 - Desenvolver testes automatizados para validar os comportamentos da aplicação.
 
@@ -24,13 +25,16 @@ O projeto foi desenvolvido com foco em boas práticas de desenvolvimento backend
 - **BCrypt** — criptografia de senhas.
 - **PostgreSQL 16** — banco de dados relacional.
 - **Flyway** — versionamento e gerenciamento de migrations.
+- **Spring Cache** — abstração para gerenciamento de cache.
+- **Spring Data Redis** — integração da aplicação com o Redis.
+- **Redis 7** — armazenamento em cache.
 - **Bean Validation** — validação de dados de entrada.
 - **Springdoc OpenAPI / Swagger UI** — documentação da API.
 - **JUnit 5, Mockito e Spring Boot Test** — testes unitários e de integração.
-- **Testcontainers 2.0.5** — provisionamento de ambientes PostgreSQL isolados para testes de integração.
+- **Testcontainers 2.0.5** — provisionamento de ambientes PostgreSQL e Redis isolados para testes de integração.
 - **JaCoCo** — análise de cobertura dos testes.
 - **Maven** — gerenciamento de dependências e build.
-- **Docker / Docker Compose** — ambiente do banco de dados.
+- **Docker / Docker Compose** — gerenciamento do ambiente PostgreSQL e Redis.
 - **Spring Boot Actuator** — monitoramento e exposição de informações operacionais da aplicação.
 
 ## Funcionalidades
@@ -49,6 +53,16 @@ O projeto foi desenvolvido com foco em boas práticas de desenvolvimento backend
 - Atualização de veículos.
 - Exclusão lógica de veículos.
 - Cadastro e consulta de categorias de veículos.
+
+### Cache
+- Integração com Redis utilizando Spring Cache.
+- Armazenamento em cache da listagem de categorias.
+- Armazenamento em cache da listagem de veículos.
+- Armazenamento em cache da consulta de veículo por identificador.
+- Tempo de expiração (TTL) de 10 minutos.
+- Desativação do armazenamento de valores nulos.
+- Invalidação automática do cache após operações de cadastro, atualização e exclusão, conforme cada operação.
+- Serialização dos dados em JSON com configurações específicas para os DTOs utilizados.
 
 ### Reservas
 - Cadastro de reservas.
@@ -115,6 +129,41 @@ src/main/java/br/com/aluguelcarros/
 - **Security:** configura autenticação JWT e controle de acesso.
 - **Exception:** centraliza exceções e respostas de erro.
 - **Config:** reúne configurações e inicializações da aplicação.
+
+## Cache com Redis
+
+A aplicação utiliza Redis como provedor de cache, integrado ao Spring Cache por meio do Spring Data Redis.
+
+O objetivo é reduzir consultas repetidas ao banco de dados PostgreSQL, armazenando temporariamente os resultados de operações de leitura.
+
+### Estratégia de cache
+
+| Cache | Operação armazenada | Chave |
+|---|---|---|
+| `categorias` | Listagem de categorias | Chave padrão |
+| `veiculos` | Listagem de veículos | Chave padrão |
+| `veiculo` | Consulta de veículo por ID | Identificador do veículo |
+
+### Configurações
+
+- **Provedor:** Redis 7.
+- **TTL:** 10 minutos.
+- **Serialização:** JSON com configurações específicas para cada tipo de DTO.
+- **Valores nulos:** não são armazenados em cache.
+- **Persistência do Redis:** habilitada com Append Only File (AOF).
+
+### Invalidação do cache
+
+O cache é invalidado após operações que modificam os dados, evitando que consultas posteriores retornem informações desatualizadas.
+
+| Operação | Cache invalidado |
+|---|---|
+| Cadastro de categoria | `categorias` |
+| Cadastro de veículo | `veiculos` |
+| Atualização de veículo | `veiculos` e `veiculo` correspondente |
+| Exclusão de veículo | `veiculos` e `veiculo` correspondente |
+
+A invalidação ocorre após a execução bem-sucedida da operação de escrita.
 
 ## Endpoints da API
 
@@ -218,7 +267,7 @@ Para executar o projeto localmente, é necessário ter instalado:
 
 O Maven Wrapper está incluído no projeto e configura automaticamente o Maven 3.10.0, não sendo necessário instalá-lo separadamente.
 
-**Importante:** o Docker Engine deve estar em execução para executar os testes de integração com Testcontainers, que inicializa automaticamente um container PostgreSQL 16.
+**Importante:** o Docker Engine deve estar em execução para iniciar os serviços PostgreSQL e Redis com Docker Compose e para executar os testes de integração com Testcontainers.
 
 ## Configuração do ambiente
 
@@ -246,19 +295,24 @@ O valor de `DB_PASSWORD` deve ser exatamente igual ao conteúdo de `secrets/post
 
 A variável `JWT_SECRET` deve conter uma chave Base64 gerada aleatoriamente. Gere a chave uma vez e reutilize o mesmo valor nas próximas inicializações. Se gerar uma nova chave, os tokens emitidos anteriormente deixarão de ser válidos.
 
-### 3. Iniciar o PostgreSQL
+### 3. Iniciar PostgreSQL e Redis
 
 Com o arquivo de senha configurado, execute:
 
 ```bash
-docker compose up -d db
+docker compose up -d db redis
 ```
 
-O comando inicia o PostgreSQL 16 utilizando Docker Compose.
+O comando inicia os seguintes serviços:
+
+- **PostgreSQL 16:** banco de dados relacional utilizado pela aplicação.
+- **Redis 7:** armazenamento utilizado pelo mecanismo de cache.
+
+O Redis utiliza persistência AOF e volume Docker para armazenar seus dados.
 
 ### 4. Executar a aplicação
 
-Com o PostgreSQL em execução e as variáveis de ambiente configuradas:
+Com PostgreSQL e Redis em execução e as variáveis de ambiente configuradas:
 
 ```bash
 ./mvnw spring-boot:run
@@ -276,6 +330,8 @@ Para executar a suíte de testes:
 ./mvnw test
 ```
 
-Os testes de integração utilizam o Testcontainers para criar e iniciar automaticamente um container PostgreSQL 16 isolado. Durante a inicialização, as migrations do Flyway são executadas nesse banco.
+Os testes de integração utilizam Testcontainers para criar e iniciar automaticamente containers isolados de PostgreSQL 16 e Redis 7.
 
-Não é necessário criar manualmente um banco de testes nem iniciar o serviço PostgreSQL do Docker Compose para executar os testes. Basta manter o Docker Engine em execução.
+Durante a inicialização, as migrations do Flyway são executadas no banco PostgreSQL utilizado pelos testes.
+
+Não é necessário criar manualmente um banco de testes nem iniciar os serviços PostgreSQL e Redis do Docker Compose para executar os testes. Basta manter o Docker Engine em execução.
